@@ -1,1 +1,0 @@
-# InvoiceVault-CTF-writeup
