@@ -8,15 +8,15 @@
 
 ## Briefing Summary
 
-InvoiceVault is a six-person SaaS platform serving around four thousand freelancer accounts. A new account-export endpoint was scaffolded from an internal admin tool during a rushed week before a cust...
+InvoiceVault is a six-person SaaS platform serving around four thousand freelancer accounts. A new account-export endpoint was scaffolded from an internal admin tool during a rushed week before a [...]
 
 ---
 
 ## Reconnaissance
 
-After registering an account and logging in, the **Settings** page revealed an "Export account data" feature — a button that downloads a ZIP archive containing `invoices.csv` and `account_info.txt`.
+After registering an account and logging in, the **Settings** page revealed an "Export account data" feature — a button that downloads a ZIP archive containing `invoices.csv` and `account_info.t[...]
 
-![Account Settings page showing Export account data feature](image/Screenshot%202026-09-03%20092329.png)
+![Account Settings page showing Export account data feature](invoicevault/image/Screenshot%202026-09-03%20092329.png)
 
 This immediately stood out. An export feature that packages account data server-side is a strong candidate for IDOR — especially one that was "scaffolded from an internal admin tool."
 
@@ -35,9 +35,9 @@ Content-Type: application/json
 {"user_id": 3}
 ```
 
-The server generates and returns a ZIP archive for the account matching that ID — without verifying that the requesting user owns that account. Any authenticated user can export any other user's dat...
+The server generates and returns a ZIP archive for the account matching that ID — without verifying that the requesting user owns that account. Any authenticated user can export any other user's[...]
 
-The root cause: the endpoint was originally built as an internal admin tool where any user ID was valid. When it was repurposed for customer-facing data portability, the ownership check was never adde...
+The root cause: the endpoint was originally built as an internal admin tool where any user ID was valid. When it was repurposed for customer-facing data portability, the ownership check was never [...]
 
 ---
 
@@ -61,13 +61,13 @@ My account was assigned `user_id: 3`.
 
 The request was sent to Burp Repeater. Changing `user_id` to `1` returned a `200 OK` with a ZIP archive belonging to a different user — confirming the IDOR vulnerability.
 
-![Burp Repeater showing user_id:1 returning another user's ZIP export](image/Screenshot%202026-09-03%20092551.png)
+![Burp Repeater showing user_id:1 returning another user's ZIP export](invoicevault/image/Screenshot%202026-09-03%20092551.png)
 
 ### Step 3: Enumerate to find the flag
 
 Tested `user_id: 2` via Burp Intercept:
 
-![Burp Intercept showing user_id:2 modification](image/Screenshot%202026-09-03%20092634.png)
+![Burp Intercept showing user_id:2 modification](invoicevault/image/Screenshot%202026-09-03%20092634.png)
 
 The ZIP archive for `user_id: 2` contained `account_info.txt` with the flag embedded in the account data.
 
